@@ -1,6 +1,6 @@
 import pandas as pd
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 
 class Row:
@@ -10,6 +10,13 @@ class Row:
         self.to_node_id = int(row[0][2])
         self.vehicle_id = int(row[1][0])
         self.start_offset_m = row[1][1]
+
+    # def __init__(self, row):
+    #     self.timestamp = datetime.strptime(row[1][0], '%Y-%m-%d %H:%M:%S')
+    #     self.from_node_id = int(row[1][1])
+    #     self.to_node_id = int(row[1][2])
+    #     self.vehicle_id = int(row[1][3])
+    #     self.start_offset_m = row[1][4]
 
     def __str__(self):
         # return str(f"_{self.timestamp}_, {self.from_node_id}, {self.to_node_id}, {self.vehicle_id},
@@ -27,7 +34,7 @@ class Segment:
         self.vehicle_count = int(vehicle_count)
         self.density = -1
         self.car_indexes = [int(car_index)]
-        self.car_offsets = []   # will be moved elswhere later
+        self.car_offsets = []   # will be moved elsewhere later
 
     def __str__(self):
         return str((self.from_node_id, self.to_node_id, self.timestamp, self.vehicle_count, self.car_indexes))
@@ -79,18 +86,17 @@ def load_row_in_time(segments, row, current_time):
 
 
 def load_input(path):
-    data = pd.read_pickle(path)
+    if path.endswith('pickle'):
+        data = pd.read_pickle(path)
+    else:
+        data = pd.read_parquet(path, engine="fastparquet")
 
     rows = [Row(r) for r in data.iterrows()]
 
     times = []
 
     for i in range(0, len(rows)):
+        print(i)
         load_row(rows, i, times)
 
-    # for time in times:
-    #     print('----')
-    #     for segment in time:
-    #         print(segment.from_node_id, segment.to_node_id, segment.timestamp, segment.vehicle_count,
-    #               segment.car_indexes)
     return times

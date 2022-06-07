@@ -1,3 +1,5 @@
+import pprint
+
 import matplotlib.pyplot as plt
 import numpy as np
 import osmnx as ox
@@ -6,7 +8,7 @@ from matplotlib.widgets import Button
 
 from app_io import load_input
 from ax_settings import Ax_settings
-from app_plot import plot_graph_route
+from app_plot import plot_graph_route, plot_segment_line, plot_segment_edge
 
 
 def get_route_network():
@@ -15,49 +17,20 @@ def get_route_network():
                                  custom_filter='["highway"~"motorway|trunk|primary|secondary"]')
 
 
-def plot_line(ax, x, y, width_from_m, width_to_m):
-    d = np.linspace(width_from_m / 10000, width_to_m / 10000, len(y))
-    y1 = np.add(y, d)
-    y2 = np.subtract(y, d)
-
-    ax.fill_between(x, y1, y2, alpha=.5, linewidth=0)
-    return ax.plot(x, y, linewidth=2)
-
-
-def plot_route(g, u, v, ax, width_from, width_to):
-    x = []
-    y = []
-
-    edge = g.get_edge_data(u, v)
-    if edge is None:
-        print("Not in map")
-    else:
-        data = min(edge.values(), key=lambda d: d["length"])
-        if "geometry" in data:
-            xs, ys = data["geometry"].xy
-            x.extend(xs)
-            y.extend(ys)
-        else:
-            x.extend((g.nodes[u]["x"], g.nodes[v]["x"]))
-            y.extend((g.nodes[u]["y"], g.nodes[v]["y"]))
-
-        plot_line(ax, x, y, width_from, width_to)
-
-
-def plot_timestamp_test(time, g, ax, ):
+def plot_timestamp_test(time, g, ax):
     if time == 0:
-        plot_route(g, 1835840419, 409801399, ax, 1, 50)
-        return plot_route(g, 409801399, 29166269, ax, 50, 50)
+        plot_segment_edge(g, 1835840419, 409801399, ax, 1, 50)
+        return plot_segment_edge(g, 409801399, 29166269, ax, 50, 50)
     if time == 1:
-        plot_route(g, 1835840419, 409801399, ax, 1, 50)
-        plot_route(g, 409801399, 29166269, ax, 50, 50)
-        return plot_route(g,  29166269, 8811408, ax, 50, 30)
+        plot_segment_edge(g, 1835840419, 409801399, ax, 1, 50)
+        plot_segment_edge(g, 409801399, 29166269, ax, 50, 50)
+        return plot_segment_edge(g,  29166269, 8811408, ax, 50, 30)
     if time == 2:
-        plot_route(g, 1835840419, 409801399, ax, 1, 50)
-        plot_route(g, 409801399, 29166269, ax, 50, 50)
-        plot_route(g, 29166269, 8811408, ax, 50, 30)
-        plot_route(g, 8811408, 8811405, ax, 30, 30)
-        return plot_route(g, 8811405, 1262229633, ax, 30, 1)
+        plot_segment_edge(g, 1835840419, 409801399, ax, 1, 50)
+        plot_segment_edge(g, 409801399, 29166269, ax, 50, 50)
+        plot_segment_edge(g, 29166269, 8811408, ax, 50, 30)
+        plot_segment_edge(g, 8811408, 8811405, ax, 30, 30)
+        return plot_segment_edge(g, 8811405, 1262229633, ax, 30, 1)
 
 
 class FrameSwitch:
@@ -70,30 +43,38 @@ class FrameSwitch:
 
     def plot(self):
         print(self.i)
-
         self.ax.clear()
         self.ax_settings.apply(self.ax)
+        self.ax.axis('off')
 
-        segments = self.times[self.i]
-        _ = plot_graph_route(self.g, segments, ax=self.ax, show=False, close=False, node_size=1)  # ax2 plot
+        if self.times is not None:
+            self.check_bounds()
+            print(self.times[self.i])
+            segments = self.times[self.i]
+            _ = plot_graph_route(self.g, segments, ax=self.ax, show=False, close=False, node_size=1)  # ax2 plot
+        else:
+            plot_timestamp_test(self.i, self.g, self.ax)
+        plt.show()
 
-        print("done")
+    def check_bounds(self):
+        if self.i < 0:
+            self.i = 0
+        elif self.i >= len(self.times):
+            self.i = len(self.times) - 1
 
     def next(self, event):
-        if 0 <= self.i + 1 < len(self.times):
-            self.i += 1
-            print(self.times[self.i])
-            self.plot()
+        self.i = self.i + 1
+        self.plot()
 
     def prev(self, event):
-        if 0 <= self.i - 1 < len(self.times):
-            self.i -= 1
-            self.plot()
+        self.i = self.i - 1
+        self.plot()
 
 
 def with_buttons():
     g = get_route_network()
-    times = load_input("../data/gv-osm_nodes_id.pickle")
+    # times = load_input("../data/gv-osm_nodes_id.pickle")
+    times = None
 
     # twin axes
     f, ax_map = plt.subplots()
