@@ -9,10 +9,10 @@ from datetime import datetime
 from app_io import load_input
 from ax_settings import twin_axes
 
-from app_collection_plot import plot_routes
-from app_base_graph import get_route_network_small, get_route_network_simple, get_route_network
-from app_plot import plot_segments
-from app_plot_cars import plot_cars
+from collection_plot import plot_routes
+from base_graph import get_route_network_small, get_route_network_simple, get_route_network
+from plot import plot_segments
+from plot_cars import plot_cars
 
 
 def data():

@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.collections import LineCollection
 
-from app_plot import get_density, plot_route_width
+from plot import get_density, plot_route_width
 
 
 # TRANSFORMS X AND Y COORDS LISTS INTO LIST OF LINES (DEFINED BY START AND END POINT

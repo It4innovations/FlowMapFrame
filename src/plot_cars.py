@@ -1,6 +1,6 @@
 import numpy as np
 
-from app_collection_plot import get_node_coordinates
+from collection_plot import get_node_coordinates
 
 
 def get_cars_xy(G, s):

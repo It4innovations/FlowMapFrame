@@ -8,9 +8,9 @@ from app_io import load_input
 from datetime import datetime
 from time import time
 from ax_settings import Ax_settings
-from app_base_graph import get_route_network, get_route_network_small, get_route_network_simple
-from app_collection_plot import plot_routes
-from app_plot_cars import plot_cars
+from base_graph import get_route_network, get_route_network_small, get_route_network_simple
+from collection_plot import plot_routes
+from plot_cars import plot_cars
 
 
 def anim(g, times, ax, ax_settings):
