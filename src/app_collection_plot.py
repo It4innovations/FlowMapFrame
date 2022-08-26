@@ -5,8 +5,7 @@ from matplotlib.collections import LineCollection
 from app_plot import get_density, plot_route_width
 
 
-# TRANSFORMS X AND Y COORDS LISTS INTO LIST OF LINES (DEFINED BY START AND END POINT)
-from app_plot_width import plot_line_width_equidistant
+# TRANSFORMS X AND Y COORDS LISTS INTO LIST OF LINES (DEFINED BY START AND END POINT
 
 
 def reshape(x, y):

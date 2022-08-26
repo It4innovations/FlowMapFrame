@@ -7,7 +7,6 @@ from matplotlib.collections import LineCollection
 
 
 # PLOTS LINE WITH AROUND LINES ABOVE MIN_WIDTH_DENSITY
-from app_plot_width import plot_line_width_equidistant
 
 
 def plot_route_width(ax, x, y,
@@ -21,10 +20,7 @@ def plot_route_width(ax, x, y,
                                      [min_width_density, max_width_density], [0, 10 * width_modifier])
 
     if max(width_from, width_to) > 0:
-        if not equidistant:
-            plot_segment_line_width(ax, x, y, width_from, width_to)
-        else:
-            plot_line_width_equidistant(ax, x, y, width_from, width_to)
+        plot_segment_line_width(ax, x, y, width_from, width_to)
 
 
 # COLORED SPACE EITHER HORIZONTALLY OR VERTICALLY AROUND LINES
