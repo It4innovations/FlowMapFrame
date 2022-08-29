@@ -6,44 +6,37 @@ import pandas as pd
 from matplotlib.widgets import Slider
 from datetime import datetime
 
-from app_io import load_input
 from ax_settings import twin_axes
 
 from collection_plot import plot_routes
 from base_graph import get_route_network_small, get_route_network_simple, get_route_network
-from plot import plot_segments
 from plot_cars import plot_cars
 
 
-def data():
-    d = pd.read_parquet("../data/data-global-view-20210616_7-10/gv_202106016_7_10.parquet", engine="fastparquet")
-    print(d)
-
-
-def create_sliders(max_time, max_width):
+def create_sliders(times_len, max_width):
     plt.subplots_adjust(bottom=0.1)
     time_slider_ax = plt.axes([0.2, 0.06, 0.65, 0.03])
     width_slider_ax = plt.axes([0.2, 0.03, 0.65, 0.03])
-    time_slider = Slider(ax=time_slider_ax, label='Time [s]', valmin=0, valmax=max_time, valstep=1)
+    time_slider = Slider(ax=time_slider_ax, label='Time [s]', valmin=0, valmax=times_len, valstep=1)
     width_slider = Slider(ax=width_slider_ax, label='Width', valmin=2, valmax=max_width, valstep=1, valinit=10)
     return time_slider, width_slider
 
 
 def with_slider():
 
-    g = get_route_network_simple()
+    g = get_route_network()
 
-    times = pd.read_pickle("../data/times.pickle")
+    times_df = pd.read_pickle("../data/data.pkl")
     f, ax_density, ax_map_settings = twin_axes(g)
 
     # get max car count
-    max_count = 0
-    for time in times:
-        for segment in time:
-            max_count = max(max_count, segment.vehicle_count)
+    max_count = times_df['vehicle_count'].max()
 
     # add slider
-    time_slider, width_slider = create_sliders(len(times) - 1, 70)
+    timestamp_from = times_df.index.min()
+    times_len = times_df.index.max() - timestamp_from
+
+    time_slider, width_slider = create_sliders(times_len, 70)
     is_with_cars = False
     width_style = 1
 
@@ -83,7 +76,7 @@ def with_slider():
         ax_map_settings.apply(ax_density)
         ax_density.axis('off')
 
-        segments = times[val]
+        segments = times_df.loc[timestamp_from + val]
 
         # MAIN PLOT FUNCTION
         width = width_slider.val
@@ -105,5 +98,3 @@ def with_slider():
 
 if __name__ == "__main__":
     with_slider()
-    pass
-

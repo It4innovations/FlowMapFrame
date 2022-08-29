@@ -4,7 +4,6 @@ import pandas as pd
 
 from matplotlib import animation
 
-from app_io import load_input
 from datetime import datetime
 from time import time
 from ax_settings import Ax_settings
@@ -13,47 +12,47 @@ from collection_plot import plot_routes
 from plot_cars import plot_cars
 
 
-def anim(g, times, ax, ax_settings):
-
+def animate(g, times, ax, ax_settings, timestamp_from):
     def step(i):
         print(i)
-        segments = times[i]
+        segments = times.loc[timestamp_from + i]
 
         ax.clear()
         ax_settings.apply(ax)
-        ax_density.axis('off')
+        ax.axis('off')
 
         plot_routes(g, segments, ax=ax)
-        # plot_cars(g, segments, ax_density)
-        # plot_segments(g, segments, ax=ax)
 
     return step
 
 
-if __name__ == "__main__":
+def main():
     start = datetime.now()
-    g = get_route_network_simple()
-
-    # RAW DATA BIG
-    # times = load_input("../data/gv_325630_records.parquet")
-
-    # RAW DATA SMALL
-    # times = load_input("../data/gv-osm_nodes_id.pickle")
+    g = get_route_network()
 
     # PREPROCESSED DATA
-    times = pd.read_pickle("../data/times.pickle")
+    times_df = pd.read_pickle("../data/data.pkl")
+    timestamp_from = times_df.index.min()
+    times_len = times_df.index.max() - timestamp_from
+    print(times_len)
+    print(times_df.to_string(index=True, max_rows=100))
 
     f, ax_map = plt.subplots()
     fig, ax_map = ox.plot_graph(g, ax=ax_map, show=False, node_size=0)
     ax_density = ax_map.twinx()
     ax_map_settings = Ax_settings(ylim=ax_map.get_ylim(), aspect=ax_map.get_aspect())
 
-    anim = animation.FuncAnimation(plt.gcf(), anim(g, times, ax_settings=ax_map_settings, ax=ax_density),
-                                   interval=150, frames=len(times), repeat=False)
+    anim = animation.FuncAnimation(plt.gcf(), animate(g, times_df,
+                                                      ax_settings=ax_map_settings, ax=ax_density,
+                                                      timestamp_from=timestamp_from),
+                                   interval=150, frames=times_len, repeat=False)
 
     timestamp = round(time() * 1000)
-
-    anim.save("images/" + str(timestamp) + "-rt.mp4", writer="ffmpeg")
+    anim.save("../images/" + str(timestamp) + "-rt.mp4", writer="ffmpeg")
 
     finish = datetime.now()
     print(finish - start)
+
+
+if __name__ == "__main__":
+    main()
