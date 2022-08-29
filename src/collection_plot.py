@@ -58,11 +58,10 @@ def plot_route(G, segment, ax,
 
 # MAIN PLOT FUNCTION
 def plot_routes(G, segments, ax,
-                min_density=1, max_density=3,
+                min_density=1, max_density=10,
                 min_width_density=10, max_width_density=50,
                 width_modifier=1,
-                width_style=1,
-                **pg_kwargs):
+                width_style=1):
     lines = []
     color_scalars = []
     if isinstance(segments, pd.Series):
@@ -76,6 +75,7 @@ def plot_routes(G, segments, ax,
             lines.extend(lines_new)
             color_scalars.extend(color_scalars_new)
 
+    print('lines', len(lines))
     if not lines:
         return
 

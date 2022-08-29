@@ -15,5 +15,5 @@ def get_route_network_simple():
                                  custom_filter='["highway"~"motorway|trunk|primary|secondary"]')
 
 
-def get_route_network():
-    return ox.load_graphml("../data/data-global-view-20210616_7-10/custom_f668ec735f24cb771654062a01a463f2.graphml")
+def get_route_network(map_file):
+    return ox.load_graphml(map_file)
