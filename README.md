@@ -3,7 +3,7 @@
 * [Roadmap](../../wikis/Roadmap)
 
 ## Použití
-Pro spuštění je potřeba soubor s počtem aut v jednotlivých časech na segmentech.
+Pro spuštění je potřeba GRAPHML soubor s mapou vykreslované oblasti a PICKLE soubor s počtem aut v jednotlivých časech na segmentech.
 Viz *segments* níže.
 
 **1) Vykreslení s posuvníkem pro šířku a čas**   

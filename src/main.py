@@ -1,3 +1,4 @@
+import logging
 import pprint
 
 import matplotlib.pyplot as plt
@@ -31,11 +32,10 @@ def get_witdh_style(style):
 
 
 @click.command()
-@click.option('--map-file', default="../data/map.graphml",
-              help='GRAPHML file with map.')
-@click.option('--segments-file', default="../data/data.pkl", help='File with preprocessed data into segments datafame.')
+@click.argument('map-file', type=click.Path(exists=True))
+@click.argument('segments-file', type=click.Path(exists=True))
 @click.option('--width-style', default='boxed',
-              help="Style of the line for wide segments. [boxed/caligraphy]")
+              help="Style of the line for wide segments. [boxed|caligraphy]")
 @click.option('--width-modif', default=10, type=click.IntRange(2, 200, clamp=True), show_default=True,
               help="Adjust width.")
 @click.option('--with-cars/--without-cars', default=False)
@@ -115,4 +115,5 @@ def with_slider(map_file, segments_file, width_style, width_modif, with_cars):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     with_slider()

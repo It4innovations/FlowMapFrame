@@ -1,3 +1,5 @@
+from os import path
+
 import click
 import osmnx as ox
 import matplotlib.pyplot as plt
@@ -33,17 +35,22 @@ def animate(g, times, ax, ax_settings, timestamp_from, max_count, width_modif, w
 
 
 @click.command()
-@click.option('--map-file', default="../data/map.graphml",
-              help='GRAPHML file with map.')
-@click.option('--segments-file', default="../data/data.pkl", help='File with preprocessed data into segments datafame.')
+@click.argument('map-file', type=click.Path(exists=True))
+@click.argument('segments-file', type=click.Path(exists=True))
 @click.option('--frames-start', default=0, help="Number of frames to skip before plotting.")
-@click.option('--frames-len', default=None, type=int, help="Number of frames to plot.")
+@click.option('--frames-len', type=int, help="Number of frames to plot.")
 @click.option('--width-style', default='boxed',
-              help="Style of the line for wide segments. [boxed/caligraphy]")
+              help="Style of the line for wide segments. [boxed|caligraphy]")
 @click.option('--width-modif', default=10, type=click.IntRange(2, 200, clamp=True), show_default=True,
               help="Adjust width.")
 @click.option('--save-path', default="", help='Path to the folder for the output video.')
 def main(map_file, segments_file, frames_start, frames_len, width_style, width_modif, save_path):
+
+    """Create a video of the traffic situation.
+
+    | MAP_FILE is graphml file with map of the plotted area.
+    | SEGMENTS_FILE is pickle file with preprocessed traffic data
+    """
     start = datetime.now()
     g = get_route_network(map_file)
 
@@ -73,9 +80,7 @@ def main(map_file, segments_file, frames_start, frames_len, width_style, width_m
 
     timestamp = round(time() * 1000)
 
-    if save_path != '' or save_path[-1] != '/':
-        save_path = save_path + '/'
-    anim.save(save_path + str(timestamp) + "-rt.mp4", writer="ffmpeg")
+    anim.save(path.join(save_path, str(timestamp) + "-rt.mp4"), writer="ffmpeg")
 
     finish = datetime.now()
     print(finish - start)

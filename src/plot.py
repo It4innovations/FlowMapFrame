@@ -1,13 +1,19 @@
 import numpy as np
 
 
-# PLOTS LINE WITH AROUND LINES ABOVE MIN_WIDTH_DENSITY
 def plot_route_width(ax, x, y,
                      density_from, density_to,
                      min_width_density, max_width_density,
                      width_modifier=2,
                      equidistant=False
                      ):
+    """
+    Plot line width around line with any density above MIN_WIDTH_DENSITY
+
+    :param list x: 1D array of horizontal coordinates of the route
+    :param list y: 1D array of vertical coordinates of the route
+    :param int width_modifier: width of the line with max_width_density (in meters * 10)
+    """
 
     width_from, width_to = np.interp([density_from, density_to],
                                      [min_width_density, max_width_density], [0, 10 * width_modifier])
@@ -16,8 +22,10 @@ def plot_route_width(ax, x, y,
         plot_segment_line_width(ax, x, y, width_from, width_to)
 
 
-# COLORED SPACE EITHER HORIZONTALLY OR VERTICALLY AROUND LINES
 def plot_segment_line_width(ax, x, y, width_from_m, width_to_m):
+    """
+    Plot coloured line width around line either horizontally or vertically
+    """
     if abs(x[0] - x[-1]) > abs(y[0] - y[-1]):
         d = np.linspace(width_from_m / 10000, width_to_m / 10000, len(y))
         y1 = np.add(y, d)

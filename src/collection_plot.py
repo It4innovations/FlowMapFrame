@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -6,10 +8,10 @@ from matplotlib.collections import LineCollection
 from plot import plot_route_width
 
 
-# TRANSFORMS X AND Y COORDS LISTS INTO LIST OF LINES (DEFINED BY START AND END POINT
-
-
 def reshape(x, y):
+    """
+    Transforms x and y coords lists into list of lines (defined by START and END point)
+    """
     points = np.vstack([x, y]).T.reshape(-1, 1, 2)
     points = np.concatenate([points[:-1], points[1:]], axis=1)
     return points
@@ -75,7 +77,7 @@ def plot_routes(G, segments, ax,
             lines.extend(lines_new)
             color_scalars.extend(color_scalars_new)
 
-    print('lines', len(lines))
+    logging.debug(f"Plotted lines: {len(lines)}")
     if not lines:
         return
 
