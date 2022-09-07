@@ -1,5 +1,7 @@
 import numpy as np
 
+from app_plot_width import plot_line_width_equidistant
+
 
 def plot_route_width(ax, x, y,
                      density_from, density_to,
@@ -19,7 +21,10 @@ def plot_route_width(ax, x, y,
                                      [min_width_density, max_width_density], [0, 10 * width_modifier])
 
     if max(width_from, width_to) > 0:
-        plot_segment_line_width(ax, x, y, width_from, width_to)
+        if equidistant:
+            plot_line_width_equidistant(ax, x, y, width_from, width_to)
+        else:
+            plot_segment_line_width(ax, x, y, width_from, width_to)
 
 
 def plot_segment_line_width(ax, x, y, width_from_m, width_to_m):

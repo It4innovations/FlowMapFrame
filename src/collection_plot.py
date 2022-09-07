@@ -55,6 +55,9 @@ def plot_route(G, segment, ax,
         if width_style == 2:
             plot_route_width(ax, x, y, density_from, density_to,
                              min_width_density, max_width_density, width_modifier, equidistant=False)
+        elif width_style == 3:
+            plot_route_width(ax, x, y, density_from, density_to,
+                             min_width_density, max_width_density, width_modifier, equidistant=True)
         return [line], [color_scalar]
 
 
