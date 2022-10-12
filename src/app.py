@@ -12,7 +12,6 @@ from time import time
 from ax_settings import Ax_settings
 from base_graph import get_route_network, get_route_network_small, get_route_network_simple
 from collection_plot import plot_routes
-from plot_cars import plot_cars
 
 
 def animate(g, times, ax, ax_settings, timestamp_from, max_count, width_modif, width_style):

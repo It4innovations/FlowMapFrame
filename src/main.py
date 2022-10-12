@@ -12,7 +12,6 @@ from ax_settings import twin_axes
 
 from collection_plot import plot_routes
 from base_graph import get_route_network_small, get_route_network_simple, get_route_network
-from plot_cars import plot_cars
 
 
 def create_sliders(max_time, max_width, width_init):
@@ -38,8 +37,7 @@ def get_witdh_style(style):
               help="Style of the line for wide segments. [boxed|caligraphy]")
 @click.option('--width-modif', default=10, type=click.IntRange(2, 200, clamp=True), show_default=True,
               help="Adjust width.")
-@click.option('--with-cars/--without-cars', default=False)
-def with_slider(map_file, segments_file, width_style, width_modif, with_cars):
+def with_slider(map_file, segments_file, width_style, width_modif):
     g = get_route_network(map_file)
 
     times_df = pd.read_pickle(segments_file)
@@ -57,7 +55,6 @@ def with_slider(map_file, segments_file, width_style, width_modif, with_cars):
     width_style = get_witdh_style(width_style)
 
     def on_press(event):
-        nonlocal with_cars
         nonlocal width_style
 
         if event.key == 'right':
@@ -68,9 +65,6 @@ def with_slider(map_file, segments_file, width_style, width_modif, with_cars):
             width_slider.set_val(width_slider.val + 1)
         elif event.key == 'down':
             width_slider.set_val(width_slider.val - 1)
-        elif event.key == 'c':
-            with_cars = not with_cars
-            update()
         elif event.key.isnumeric():
             width_style = int(event.key) % 4
             update()
@@ -99,10 +93,6 @@ def with_slider(map_file, segments_file, width_style, width_modif, with_cars):
         _ = plot_routes(g, segments, ax=ax_density,
                         max_width_density=max_count,
                         width_modifier=width, width_style=width_style)
-
-        # plot cars
-        if with_cars:
-            plot_cars(g, segments, ax_density)
 
         f.canvas.draw_idle()
 
