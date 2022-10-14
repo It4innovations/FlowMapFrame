@@ -12,6 +12,7 @@ from ax_settings import twin_axes
 
 from collection_plot import plot_routes
 from base_graph import get_route_network_small, get_route_network_simple, get_route_network
+from app import get_witdh_style
 
 
 def create_sliders(max_time, max_width, width_init):
@@ -21,13 +22,6 @@ def create_sliders(max_time, max_width, width_init):
     time_slider = Slider(ax=time_slider_ax, label='Time [s]', valmin=0, valmax=max_time, valstep=1)
     width_slider = Slider(ax=width_slider_ax, label='Width', valmin=2, valmax=max_width, valstep=1, valinit=width_init)
     return time_slider, width_slider
-
-
-def get_witdh_style(style):
-    return {
-        'boxed': 1, 'b': 1, '1': 1,
-        'caligraphy': 2, 'c': 2, '2': 2
-    }.get(style, 1)
 
 
 @click.command()

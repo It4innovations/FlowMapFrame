@@ -9,15 +9,9 @@ def plot_line_width_equidistant(ax, x, y, width_from_m, width_to_m):
     line = LineString(zip(x, y))
 
     distances = np.linspace(width_from_m, width_to_m, len(x))
-    min_distance = min(width_from_m, width_to_m)
-    max_distance = max(width_from_m, width_to_m)
-    if min_distance == max_distance:
-        pol = line.buffer(min_distance)
-        plot_polygons(ax, pol)
-    else:
-        x_eq, y_eq, x_eq2, y_eq2 = eq(x, y, distances)
+    x_eq, y_eq, x_eq2, y_eq2 = eq(x, y, distances)
 
-        plot_polygon_between_lines(ax, x_eq, y_eq, x_eq2, y_eq2, min_distance)
+    plot_polygon_between_lines(ax, x_eq, y_eq, x_eq2, y_eq2)
 
 
 def plot_polygons(ax, pol):
@@ -28,14 +22,13 @@ def plot_polygons(ax, pol):
         ax.fill(*pol.exterior.xy, 'red')
 
 
-def plot_polygon_between_lines(ax, x1, y1, x2, y2, min_distance):
+def plot_polygon_between_lines(ax, x1, y1, x2, y2):
     if len(x1) < 2:
         return
     l1 = LineString(zip(x1, y1))
     l2 = LineString(zip(x2, y2))
 
     pol = Polygon([*list(l1.coords), *list(l2.coords)[::-1]])
-    pol = pol.buffer(min_distance)
     plot_polygons(ax, pol)
 
 

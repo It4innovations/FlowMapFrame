@@ -33,25 +33,35 @@ def animate(g, times, ax, ax_settings, timestamp_from, max_count, width_modif, w
     return step
 
 
+def get_witdh_style(style):
+    return {
+        'boxed': 1, 'b': 1, '1': 1,
+        'caligraphy': 2, 'c': 2, '2': 2,
+        'equidistant': 3, 'e': 3, '3': 3,
+    }.get(style, 1)
+
+
 @click.command()
 @click.argument('map-file', type=click.Path(exists=True))
 @click.argument('segments-file', type=click.Path(exists=True))
 @click.option('--frames-start', default=0, help="Number of frames to skip before plotting.")
 @click.option('--frames-len', type=int, help="Number of frames to plot.")
 @click.option('--width-style', default='boxed',
-              help="Style of the line for wide segments. [boxed|caligraphy]")
+              help="Style of the line for wide segments. [boxed|caligraphy|equidistant]")
 @click.option('--width-modif', default=10, type=click.IntRange(2, 200, clamp=True), show_default=True,
               help="Adjust width.")
 @click.option('--save-path', default="", help='Path to the folder for the output video.')
 def main(map_file, segments_file, frames_start, frames_len, width_style, width_modif, save_path):
-
     """Create a video of the traffic situation.
 
     | MAP_FILE is graphml file with map of the plotted area.
     | SEGMENTS_FILE is pickle file with preprocessed traffic data
     """
     start = datetime.now()
+    print(start)
     g = get_route_network(map_file)
+
+    width_style = get_witdh_style(width_style)
 
     # PREPROCESSED DATA
     times_df = pd.read_pickle(segments_file)
@@ -60,9 +70,6 @@ def main(map_file, segments_file, frames_start, frames_len, width_style, width_m
     times_len = times_df.index.max() - timestamp_from
     times_len = min(frames_len, times_len) if frames_len else times_len
     max_count = times_df['vehicle_count'].max()
-
-    print(times_len)
-    print(times_df.to_string(index=True, max_rows=100))
 
     f, ax_map = plt.subplots()
     fig, ax_map = ox.plot_graph(g, ax=ax_map, show=False, node_size=0)
