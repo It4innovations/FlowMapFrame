@@ -5,7 +5,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.collections import LineCollection
 
-from plot import plot_route_width
+from src.plot import plot_route_width
 
 
 def reshape(x, y):
@@ -45,8 +45,8 @@ def plot_route(G, segment, ax,
         x, y = get_node_coordinates(edge, G, segment)
 
         # color gradient
-        density_from = segment['count_from']
-        density_to = segment['count_to']
+        density_from = segment['count_list'][0]
+        density_to = segment['count_list'][1]
 
         line = reshape(x, y)
         color_scalar = np.linspace(density_from, density_to, len(x) - 1)

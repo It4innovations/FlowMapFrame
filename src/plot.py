@@ -1,6 +1,6 @@
 import numpy as np
 
-from plot_width import plot_line_width_equidistant
+from src.plot_width import plot_line_width_equidistant
 
 
 def plot_route_width(ax, x, y,
