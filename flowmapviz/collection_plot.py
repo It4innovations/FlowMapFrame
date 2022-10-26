@@ -5,7 +5,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.collections import LineCollection
 
-from src.plot import plot_route_width
+from .plot import plot_route_width
 
 
 def reshape(x, y):
