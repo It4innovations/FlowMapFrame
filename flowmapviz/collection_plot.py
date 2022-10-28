@@ -5,7 +5,16 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.collections import LineCollection
 
+from enum import Enum, unique
+
 from .plot import plot_route_width
+
+
+@unique
+class WidthStyle(Enum):
+    BOXED = 1
+    CALLIGRAPHY = 2
+    EQUIDISTANT = 3
 
 
 def reshape(x, y):
@@ -36,7 +45,7 @@ def get_node_coordinates(edge, G, s):
 def plot_route(G, segment, ax,
                min_width_density, max_width_density,
                width_modifier,
-               width_style,
+               width_style: WidthStyle,
                **pg_kwargs):
     edge = G.get_edge_data(segment['node_from'], segment['node_to'])
     if edge is None:
@@ -52,10 +61,10 @@ def plot_route(G, segment, ax,
         color_scalar = np.linspace(density_from, density_to, len(x) - 1)
 
         # width as filling
-        if width_style == 2:
+        if width_style == WidthStyle.CALLIGRAPHY:
             plot_route_width(ax, x, y, density_from, density_to,
                              min_width_density, max_width_density, width_modifier, equidistant=False)
-        elif width_style == 3:
+        elif width_style == WidthStyle.EQUIDISTANT:
             plot_route_width(ax, x, y, density_from, density_to,
                              min_width_density, max_width_density, width_modifier, equidistant=True)
         return [line], [color_scalar]
@@ -66,7 +75,7 @@ def plot_routes(G, segments, ax,
                 min_density=1, max_density=10,
                 min_width_density=10, max_width_density=50,
                 width_modifier=1,
-                width_style=1):
+                width_style: WidthStyle = WidthStyle.BOXED):
     lines = []
     color_scalars = []
     if isinstance(segments, pd.Series):
@@ -92,7 +101,7 @@ def plot_routes(G, segments, ax,
     coll = LineCollection(lines, cmap='autumn_r', norm=norm)
 
     # width in collection
-    if width_style == 1:
+    if width_style == WidthStyle.BOXED:
         line_widths = np.interp(color_scalars, [min_width_density, max_width_density], [2, 2 + width_modifier])
         coll.set_linewidth(line_widths)
 

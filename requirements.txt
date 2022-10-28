@@ -1,6 +1,4 @@
-osmnx
-mathplotlib
 pandas
 numpy
+matplotlib
 shapely
-click
