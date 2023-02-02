@@ -49,7 +49,7 @@ def plot_route(G, segment, ax,
                **pg_kwargs):
     edge = G.get_edge_data(segment['node_from'], segment['node_to'])
     if edge is None:
-        return [], []
+        return [], [], []
     else:
         x, y = get_node_coordinates(edge, G, segment)
 
@@ -59,15 +59,20 @@ def plot_route(G, segment, ax,
 
         line = reshape(x, y)
         color_scalar = np.linspace(density_from, density_to, len(x) - 1)
+        polygons = []
 
         # width as filling
         if width_style == WidthStyle.CALLIGRAPHY:
-            plot_route_width(ax, x, y, density_from, density_to,
-                             min_width_density, max_width_density, width_modifier, equidistant=False)
+            patch = plot_route_width(ax, x, y, density_from, density_to,
+                                     min_width_density, max_width_density, width_modifier, equidistant=False)
+            polygons.extend(patch)
+
         elif width_style == WidthStyle.EQUIDISTANT:
-            plot_route_width(ax, x, y, density_from, density_to,
-                             min_width_density, max_width_density, width_modifier, equidistant=True)
-        return [line], [color_scalar]
+            patch = plot_route_width(ax, x, y, density_from, density_to,
+                                     min_width_density, max_width_density, width_modifier, equidistant=True)
+            polygons.extend(patch)
+
+        return [line], [color_scalar], polygons
 
 
 # MAIN PLOT FUNCTION
@@ -78,16 +83,20 @@ def plot_routes(G, segments, ax,
                 width_style: WidthStyle = WidthStyle.BOXED):
     lines = []
     color_scalars = []
+    polygons = []
     if isinstance(segments, pd.Series):
-        lines, color_scalars = plot_route(G, segments, ax, min_width_density, max_width_density,
-                                          width_modifier=width_modifier, width_style=width_style)
+        lines, color_scalars, polygons = plot_route(G, segments, ax, min_width_density, max_width_density,
+                                                    width_modifier=width_modifier,
+                                                    width_style=width_style)
 
     else:
         for _, s in segments.iterrows():
-            lines_new, color_scalars_new = plot_route(G, s, ax, min_width_density, max_width_density,
-                                                      width_modifier=width_modifier, width_style=width_style)
+            lines_new, color_scalars_new, polygons_new = plot_route(G, s, ax, min_width_density, max_width_density,
+                                                                    width_modifier=width_modifier,
+                                                                    width_style=width_style)
             lines.extend(lines_new)
             color_scalars.extend(color_scalars_new)
+            polygons.extend(polygons_new)
 
     logging.debug(f"Plotted lines: {len(lines)}")
     if not lines:
@@ -107,3 +116,5 @@ def plot_routes(G, segments, ax,
 
     coll.set_array(color_scalars)
     ax.add_collection(coll)
+
+    return coll, polygons

@@ -22,9 +22,11 @@ def plot_route_width(ax, x, y,
 
     if max(width_from, width_to) > 0:
         if equidistant:
-            plot_line_width_equidistant(ax, x, y, width_from, width_to)
+            return plot_line_width_equidistant(ax, x, y, width_from, width_to)
         else:
-            plot_segment_line_width(ax, x, y, width_from, width_to)
+            return plot_segment_line_width(ax, x, y, width_from, width_to)
+
+    return []
 
 
 def plot_segment_line_width(ax, x, y, width_from_m, width_to_m):
@@ -36,10 +38,12 @@ def plot_segment_line_width(ax, x, y, width_from_m, width_to_m):
         y1 = np.add(y, d)
         y2 = np.subtract(y, d)
 
-        ax.fill_between(x, y1, y2, alpha=1, linewidth=0, color='red')
+        patch = ax.fill_between(x, y1, y2, alpha=1, linewidth=0, color='red')
     else:
         d = np.linspace(width_from_m / 10000, width_to_m / 10000, len(x))
         x1 = np.add(x, d)
         x2 = np.subtract(x, d)
 
-        ax.fill_betweenx(y=y, x1=x1, x2=x2, alpha=1, linewidth=0, color='red')
+        patch = ax.fill_betweenx(y=y, x1=x1, x2=x2, alpha=1, linewidth=0, color='red')
+
+    return [patch]

@@ -10,25 +10,31 @@ def plot_line_width_equidistant(ax, x, y, width_from_m, width_to_m):
     distances = np.linspace(width_from_m, width_to_m, len(x))
     x_eq, y_eq, x_eq2, y_eq2 = calculate_equidistant_coords(x, y, distances)
 
-    plot_polygon_between_lines(ax, x_eq, y_eq, x_eq2, y_eq2)
+    return plot_polygon_between_lines(ax, x_eq, y_eq, x_eq2, y_eq2)
 
 
 def plot_polygons(ax, pol):
     if type(pol) is MultiPolygon:
+        patches = []
         for p in pol.geoms:
-            ax.fill(*p.exterior.xy, 'red')
+            patch = ax.fill(*p.exterior.xy, 'red')
+            patches.append(patch)
+
+        return patches
     else:
-        ax.fill(*pol.exterior.xy, 'red')
+        patch = ax.fill(*pol.exterior.xy, 'red')
+        return [patch]
 
 
 def plot_polygon_between_lines(ax, x1, y1, x2, y2):
     if len(x1) < 2:
-        return
+        return []
+
     l1 = LineString(zip(x1, y1))
     l2 = LineString(zip(x2, y2))
 
     pol = Polygon([*list(l1.coords), *list(l2.coords)[::-1]])
-    plot_polygons(ax, pol)
+    return plot_polygons(ax, pol)
 
 
 def calculate_equidistant_coords(x, y, distances):
