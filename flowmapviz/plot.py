@@ -1,13 +1,23 @@
 import numpy as np
-
+from matplotlib.collections import PatchCollection
+from matplotlib.patches import Circle
 from .plot_width import plot_line_width_equidistant
+
+
+def add_circle_endings(ax, x, y, width_from, width_to):
+    patches = [Circle((x[0], y[0]), width_from / 20_000), Circle((x[-1], y[-1]), width_to / 20_000)]
+    p = PatchCollection(patches)
+    p.set_facecolor("red")
+    ax.add_collection(p)
+    return p
 
 
 def plot_route_width(ax, x, y,
                      density_from, density_to,
                      min_width_density, max_width_density,
                      width_modifier=2,
-                     equidistant=False
+                     equidistant=False,
+                     round_edges=True,
                      ):
     """
     Plot line width around line with any density above MIN_WIDTH_DENSITY
@@ -20,13 +30,20 @@ def plot_route_width(ax, x, y,
     width_from, width_to = np.interp([density_from, density_to],
                                      [min_width_density, max_width_density], [0, 10 * width_modifier])
 
-    if max(width_from, width_to) > 0:
-        if equidistant:
-            return plot_line_width_equidistant(ax, x, y, width_from, width_to)
-        else:
-            return plot_segment_line_width(ax, x, y, width_from, width_to)
+    polygons = []
 
-    return []
+    if max(width_from, width_to) > 0:
+
+        if round_edges:
+            polygons.append(add_circle_endings(ax, x, y, width_from, width_to))
+
+        if equidistant:
+            patch = plot_line_width_equidistant(ax, x, y, width_from, width_to)
+        else:
+            patch = plot_segment_line_width(ax, x, y, width_from, width_to)
+        polygons.extend(patch)
+
+    return polygons
 
 
 def plot_segment_line_width(ax, x, y, width_from_m, width_to_m):
