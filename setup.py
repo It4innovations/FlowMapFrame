@@ -7,5 +7,4 @@ setup(
     author='Pavlina Smolkova',
     author_email='smo0117@vsb.cz',
     description='Package for plotting routes',
-    # install_requires=[osmnx, mathplotlib, pandas, click, numpy, shapely]
 )

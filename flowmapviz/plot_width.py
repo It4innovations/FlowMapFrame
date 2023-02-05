@@ -1,40 +1,24 @@
 import numpy as np
-from shapely.geometry import LineString, Polygon, MultiPolygon
+import matplotlib.patches as mp
+from shapely.geometry import LineString
 
 
-def plot_line_width_equidistant(ax, x, y, width_from_m, width_to_m):
-
-    width_from_m = width_from_m / 10000
-    width_to_m = width_to_m / 10000
-
-    distances = np.linspace(width_from_m, width_to_m, len(x))
+def get_polygon_from_equidistant(ax, x, y, width_from, width_to):
+    distances = np.linspace(width_from, width_to, len(x))
     x_eq, y_eq, x_eq2, y_eq2 = calculate_equidistant_coords(x, y, distances)
 
-    return plot_polygon_between_lines(ax, x_eq, y_eq, x_eq2, y_eq2)
+    return create_polygon_between_lines(ax, x_eq, y_eq, x_eq2, y_eq2)
 
 
-def plot_polygons(ax, pol):
-    if type(pol) is MultiPolygon:
-        patches = []
-        for p in pol.geoms:
-            patch = ax.fill(*p.exterior.xy, 'red')
-            patches.append(patch)
-
-        return patches
-    else:
-        patch = ax.fill(*pol.exterior.xy, 'red')
-        return [patch]
-
-
-def plot_polygon_between_lines(ax, x1, y1, x2, y2):
+def create_polygon_between_lines(ax, x1, y1, x2, y2):
     if len(x1) < 2:
-        return []
+        return None
 
-    l1 = LineString(zip(x1, y1))
-    l2 = LineString(zip(x2, y2))
+    x = np.append(x1, np.flip(x2))
+    y = np.append(y1, np.flip(y2))
+    coords = list(zip(x, y))
 
-    pol = Polygon([*list(l1.coords), *list(l2.coords)[::-1]])
-    return plot_polygons(ax, pol)
+    return mp.Polygon(coords, closed=True)
 
 
 def calculate_equidistant_coords(x, y, distances):
@@ -90,7 +74,7 @@ def calculate_equidistant_coords(x, y, distances):
     original_line = LineString(zip(x, y))
 
     for i in range(1, len(x_eq)):
-        seg = LineString(zip(x_eq[i-1:i+1], y_eq[i-1:i+1]))
+        seg = LineString(zip(x_eq[i - 1:i + 1], y_eq[i - 1:i + 1]))
 
         if original_line.intersection(seg):
             x_eq[i], x_eq2[i] = x_eq2[i], x_eq[i]
