@@ -41,7 +41,7 @@ def plot_route_width(ax, x, y,
     if max(width_from, width_to) > 0:
 
         if round_edges:
-            polygons.extend(add_circle_endings(ax, x, y, width_from, width_to))
+            polygons.extend(create_circle_endings(ax, x, y, width_from, width_to))
 
         if equidistant:
             patch = get_polygon_from_equidistant(ax, x, y, width_from, width_to)

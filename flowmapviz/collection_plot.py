@@ -55,8 +55,8 @@ def plot_route(G, segment, ax,
         x, y = get_node_coordinates(edge, G, segment)
 
         # color gradient
-        density_from = segment['count_from'] + max_width_density
-        density_to = segment['count_to'] + max_width_density
+        density_from = segment['count_from']
+        density_to = segment['count_to']
 
         line = reshape(x, y)
         color_scalar = np.linspace(density_from, density_to, len(x) - 1)
