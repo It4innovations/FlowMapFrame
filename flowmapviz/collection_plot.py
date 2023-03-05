@@ -117,6 +117,8 @@ def plot_routes(G, segments, ax,
     if width_style == WidthStyle.BOXED:
         line_widths = np.interp(color_scalars, [min_width_density, max_width_density], [2, 2 + width_modifier])
         coll.set_linewidth(line_widths)
+        if round_edges:
+            coll.set_capstyle('round')
 
     coll.set_array(color_scalars)
     ax.add_collection(coll, autolim=False)
