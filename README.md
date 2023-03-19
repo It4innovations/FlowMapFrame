@@ -7,8 +7,9 @@ Pro spuštění je potřeba GRAPHML soubor s mapou vykreslované oblasti a soubo
 Viz *segments* níže.
 
 Zavolání funkce pro vykreslení snímku v rámci kódu:
+
 ```python
-from flowmapviz.collection_plot import plot_routes
+from flowmapviz.plot import plot_routes
 ```
 * segments: třída dataframe/pd.Series obsahující sloupce `node_from` a `node_to` (osmnx id definující segment)
 a sloupce `count_from` a `count_to` definující počet aut u těchto nodů
