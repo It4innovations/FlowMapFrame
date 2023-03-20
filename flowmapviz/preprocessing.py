@@ -6,6 +6,9 @@ from matplotlib.patches import Circle
 from shapely.geometry import LineString
 
 
+# ---------------------------------------------------------------------------------
+# Generic
+
 def get_width_polygon(ax: Axes,
                       x: list[float],
                       y: list[float],
@@ -49,6 +52,10 @@ def create_circle_endings(ax, x, y, width_from, width_to, plot=False):
     return patches
 
 
+# ---------------------------------------------------------------------------------
+# Caligraphy
+
+
 def plot_segment_line_width(ax, x, y, width_from, width_to):
     """
     Plot coloured line width around line either horizontally or vertically
@@ -68,6 +75,9 @@ def plot_segment_line_width(ax, x, y, width_from, width_to):
 
     return patch
 
+
+# ---------------------------------------------------------------------------------
+# Equidistant
 
 def get_polygon_from_equidistant(ax, x, y, width_from, width_to):
     distances = np.linspace(width_from, width_to, len(x))
