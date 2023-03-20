@@ -80,7 +80,8 @@ def plot_routes(g: nx.MultiDiGraph,
             color_scalars.append(color_scalars_new)
             polygons.extend(polygons_new)
 
-    logging.info(f"False segments: {false_segments} from {len(nodes_from)}")
+    if false_segments:
+        logging.info(f"False segments: {false_segments} from {len(nodes_from)}")
 
     if not lines:
         return None, None
