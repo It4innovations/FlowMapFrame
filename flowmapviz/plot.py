@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 
 import networkx as nx
@@ -29,8 +31,10 @@ class WidthStyle(Enum):
 
 
 def plot_routes(g: nx.MultiDiGraph,
-                segments: pd.DataFrame,
                 ax: Axes,
+                nodes_from: list[int],
+                nodes_to: list[int],
+                densities: list[int] | list[list[int]],
                 min_density: int = 1, max_density: int = 10,
                 min_width_density: int = 10, max_width_density: int = 50,
                 width_modifier: float = 1,
@@ -41,8 +45,10 @@ def plot_routes(g: nx.MultiDiGraph,
     """
     Plotting of segments into ax with their density represented by color and width
     :param g: Graph representation of base layer map
-    :param segments: Dataframe of segments represented by columns: 'node_from', 'node_to', 'count_from', 'count_to
     :param ax: layer for adding plotted shapes
+    :param nodes_from: OSMN id defining starting nodes of segments
+    :param nodes_to: OSMN id defining ending nodes of segments
+    :param densities: list of lists defining number of cars for each part of the segment
     :param min_density: density defining color gradient scope
     :param max_density: density defining color gradient scope
     :param min_width_density: density defining width change scope
@@ -57,11 +63,14 @@ def plot_routes(g: nx.MultiDiGraph,
     color_scalars = []
     polygons = []
     false_segments = 0
-    if isinstance(segments, pd.Series):
-        segments = pd.DataFrame([segments])
+    if not (len(nodes_from) == len(nodes_to) and len(nodes_to) == len(densities)):
+        logging.error(f"Nodes_from, nodes_to and densitites does not have the same lenght")
 
-    for _, s in segments.iterrows():
-        lines_new, color_scalars_new, polygons_new = plot_route(g, s, ax, min_width_density, max_width_density,
+    for node_from, node_to, density in zip(nodes_from, nodes_to, densities):
+        if type(density) is int:
+            density = [density]
+
+        lines_new, color_scalars_new, polygons_new = plot_route(g, node_from, node_to, density, ax, min_width_density, max_width_density,
                                                                 width_modifier=width_modifier,
                                                                 width_style=width_style, round_edges=round_edges)
         if lines_new is None:
@@ -71,7 +80,7 @@ def plot_routes(g: nx.MultiDiGraph,
             color_scalars.append(color_scalars_new)
             polygons.extend(polygons_new)
 
-    logging.info(f"False segments: {false_segments} from {segments.shape}")
+    logging.info(f"False segments: {false_segments} from {len(nodes_from)}")
 
     if not lines:
         return None, None
@@ -101,7 +110,9 @@ def plot_routes(g: nx.MultiDiGraph,
 
 
 def plot_route(g: nx.MultiDiGraph,
-               segment: pd.Series,
+               node_from: int,
+               node_to: int,
+               densities: list[int],
                ax: Axes,
                min_width_density: int,
                max_width_density: int,
@@ -109,15 +120,15 @@ def plot_route(g: nx.MultiDiGraph,
                width_style: WidthStyle,
                round_edges: bool = True,
                **pg_kwargs):
-    edge = g.get_edge_data(segment['node_from'], segment['node_to'])
+    edge = g.get_edge_data(node_from, node_to)
     if edge is None:
         return None, None, None
     else:
-        x, y = get_node_coordinates(edge, g, segment)
+        x, y = get_node_coordinates(edge, g, node_from, node_to)
 
         # color gradient
-        density_from = segment['count_from']
-        density_to = segment['count_to']
+        density_from = densities[0]
+        density_to = densities[-1]
 
         line = reshape(x, y)
         color_scalar = np.linspace(density_from, density_to, len(x) - 1)
@@ -135,7 +146,7 @@ def plot_route(g: nx.MultiDiGraph,
         return line, color_scalar, polygons
 
 
-def get_node_coordinates(edge, g, s):
+def get_node_coordinates(edge, g, node_from, node_to):
     x = []
     y = []
 
@@ -145,8 +156,8 @@ def get_node_coordinates(edge, g, s):
         x.extend(xs)
         y.extend(ys)
     else:
-        x.extend((g.nodes[s['node_from']]["x"], g.nodes[s['node_to']]["x"]))
-        y.extend((g.nodes[s['node_from']]["y"], g.nodes[s['node_to']]["y"]))
+        x.extend((g.nodes[node_from]["x"], g.nodes[node_to]["x"]))
+        y.extend((g.nodes[node_from]["y"], g.nodes[node_to]["y"]))
 
     return x, y
 
