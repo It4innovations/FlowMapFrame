@@ -6,13 +6,13 @@
 Pro spuštění je potřeba GRAPHML soubor s mapou vykreslované oblasti a soubor s počtem aut v jednotlivých časech na segmentech.
 Viz *segments* níže.
 
-Zavolání funkce pro vykreslení snímku v rámci kódu:
+Zavolání funkce pro vykreslení snímku:
 
 ```python
 from flowmapviz.plot import plot_routes
 ```
-* segments: třída dataframe/pd.Series obsahující sloupce `node_from` a `node_to` (osmnx id definující segment)
-a sloupce `count_from` a `count_to` definující počet aut u těchto nodů
+* segments: třída pd.Dataframe, obsahující sloupce `node_from` a `node_to` (osmnx id definující segment)
+a sloupce `count_from` a `count_to`, definující počet aut u těchto nodů
 
 *  min/max_density: rozmezí určující barvu segmentu - od žluté (min_density) po červenou (max_density)
 * min_width_density: počet aut, při kterém se začně zvyšovat šířka vykreslené cesty
@@ -20,8 +20,9 @@ a sloupce `count_from` a `count_to` definující počet aut u těchto nodů
 * width_modifier: maximální šířka cesty
 * width_style = enum
   * BOXED - zubatý okraj (šířka v pixelech)
-  * CALLIGRAPHY - kaligrafický okraj (šířka v metrech * 10)
+  * CALLIGRAPHY - kaligrafický okraj (šířka v lat stupních / 1000)
   * EQUIDISTANT - okraj počítaný pomocí equidistanty
+* round_edges: proměnná určující zda se na ohraj segmentů mají vykreslit kruhy pro plynulejší přechod
 ```python
 def plot_routes(G, segments, ax,
                 min_density=1, max_density=10,

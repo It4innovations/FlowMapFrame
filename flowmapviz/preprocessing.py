@@ -1,25 +1,20 @@
 import numpy as np
 import matplotlib.patches as mp_patches
+from matplotlib.axes import Axes
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Circle
 from shapely.geometry import LineString
 
 
-def get_width_polygon(ax, x, y,
-                             density_from, density_to,
-                             min_width_density, max_width_density,
-                             width_modifier=2,
-                             equidistant=False,
-                             round_edges=True,
-                             ):
-    """
-    Create polygon representing line width with any density above MIN_WIDTH_DENSITY
-
-    :param list x: 1D array of horizontal coordinates of the route
-    :param list y: 1D array of vertical coordinates of the route
-    :param int width_modifier: width of the line with max_width_density (in lat degrees / 1 000)
-    """
-
+def get_width_polygon(ax: Axes,
+                      x: list[float],
+                      y: list[float],
+                      density_from: int, density_to: int,
+                      min_width_density: int, max_width_density: int,
+                      width_modifier: float = 2,
+                      equidistant: bool = False,
+                      round_edges: bool = True,
+                      ):
     width_from, width_to = np.interp([density_from, density_to],
                                      [min_width_density, max_width_density], [0, width_modifier])
 
