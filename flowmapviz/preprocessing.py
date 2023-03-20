@@ -12,28 +12,26 @@ from shapely.geometry import LineString
 def get_width_polygon(ax: Axes,
                       x: list[float],
                       y: list[float],
-                      density_from: int, density_to: int,
+                      densities: list[int],
                       min_width_density: int, max_width_density: int,
                       width_modifier: float = 2,
                       equidistant: bool = False,
                       round_edges: bool = True,
                       ):
-    width_from, width_to = np.interp([density_from, density_to],
-                                     [min_width_density, max_width_density], [0, width_modifier])
+    widths = np.interp(densities, [min_width_density, max_width_density], [0, width_modifier / 1000])
 
     polygons = []
-    width_from, width_to = width_from / 1000, width_to / 1000
 
-    if max(width_from, width_to) > 0:
+    if widths.any() > 0:
 
         if round_edges:
-            polygons.extend(create_circle_endings(ax, x, y, width_from, width_to))
+            polygons.extend(create_circle_endings(ax, x, y, widths[0], widths[-1]))
 
         if equidistant:
-            patch = get_polygon_from_equidistant(ax, x, y, width_from, width_to)
+            patch = get_polygon_from_equidistant(x, y, widths)
             polygons.append(patch)
         else:
-            patch = plot_segment_line_width(ax, x, y, width_from, width_to)
+            _ = plot_segment_line_width(ax, x, y, widths)
 
     return polygons
 
@@ -53,23 +51,21 @@ def create_circle_endings(ax, x, y, width_from, width_to, plot=False):
 
 
 # ---------------------------------------------------------------------------------
-# Caligraphy
+# Calligraphy
 
 
-def plot_segment_line_width(ax, x, y, width_from, width_to):
+def plot_segment_line_width(ax, x, y,  widths):
     """
     Plot coloured line width around line either horizontally or vertically
     """
     if abs(x[0] - x[-1]) > abs(y[0] - y[-1]):
-        d = np.linspace(width_from, width_to, len(y))
-        y1 = np.add(y, d)
-        y2 = np.subtract(y, d)
+        y1 = np.add(y, widths)
+        y2 = np.subtract(y, widths)
 
         patch = ax.fill_between(x, y1, y2, alpha=1, linewidth=0, color='red')
     else:
-        d = np.linspace(width_from, width_to, len(x))
-        x1 = np.add(x, d)
-        x2 = np.subtract(x, d)
+        x1 = np.add(x, widths)
+        x2 = np.subtract(x, widths)
 
         patch = ax.fill_betweenx(y=y, x1=x1, x2=x2, alpha=1, linewidth=0, color='red')
 
@@ -79,9 +75,8 @@ def plot_segment_line_width(ax, x, y, width_from, width_to):
 # ---------------------------------------------------------------------------------
 # Equidistant
 
-def get_polygon_from_equidistant(ax, x, y, width_from, width_to):
-    distances = np.linspace(width_from, width_to, len(x))
-    x_eq, y_eq, x_eq2, y_eq2 = calculate_equidistant_coords(x, y, distances)
+def get_polygon_from_equidistant(x, y, widths):
+    x_eq, y_eq, x_eq2, y_eq2 = calculate_equidistant_coords(x, y, widths)
 
     if len(x_eq) < 2:
         return None

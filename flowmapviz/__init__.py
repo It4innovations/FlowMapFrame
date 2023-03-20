@@ -1,1 +1,1 @@
-from .plot import plot_routes
+from .plot import plot_routes, WidthStyle

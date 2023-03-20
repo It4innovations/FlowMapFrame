@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import logging
-
 import networkx as nx
 import numpy as np
+
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.collections import LineCollection
-
 from enum import Enum, unique
 
 from .preprocessing import get_width_polygon, plot_polygon_patch
@@ -21,7 +20,7 @@ class WidthStyle(Enum):
     """
     CALLIGRAPHY = 2
     """
-    uses matplotlib.fill_between / matplotlib.fill_betweex
+    uses matplotlib.fill_between / matplotlib.fill_betweenx
     """
     EQUIDISTANT = 3
     """
@@ -45,8 +44,8 @@ def plot_routes(g: nx.MultiDiGraph,
     Plotting of segments into ax with their density represented by color and width
     :param g: Graph representation of base layer map
     :param ax: layer for adding plotted shapes
-    :param nodes_from: OSMN id defining starting nodes of segments
-    :param nodes_to: OSMN id defining ending nodes of segments
+    :param nodes_from: OSM id defining starting nodes of segments
+    :param nodes_to: OSM id defining ending nodes of segments
     :param densities: list of lists defining number of cars for each part of the segment
     :param min_density: density defining color gradient scope
     :param max_density: density defining color gradient scope
@@ -63,7 +62,7 @@ def plot_routes(g: nx.MultiDiGraph,
     polygons = []
     false_segments = 0
     if not (len(nodes_from) == len(nodes_to) and len(nodes_to) == len(densities)):
-        logging.error(f"Nodes_from, nodes_to and densitites does not have the same lenght")
+        logging.error(f"Nodes_from, nodes_to and densities does not have the same length")
 
     for node_from, node_to, density in zip(nodes_from, nodes_to, densities):
         if type(density) is int:
@@ -126,21 +125,24 @@ def plot_route(g: nx.MultiDiGraph,
     if not x or not y:
         return None, None, None
 
-    # color gradient
-    density_from = densities[0]
-    density_to = densities[-1]
+    # edit length of densities to match length of x
+    a = np.arange(len(x))
+    density_index = np.interp(a, [0, len(x)], [0, len(densities)])
+    point_densities = np.interp(density_index, np.arange(len(densities)), densities)
 
+    # color gradient
     line = reshape(x, y)
-    color_scalar = np.linspace(density_from, density_to, len(x) - 1)
-    polygons = []
+    density_index = np.interp(np.arange(len(line)), [0, len(line)], [0, len(densities)])
+    color_scalar = np.interp(density_index, np.arange(len(densities)), densities)
 
     # width as filling
+    polygons = []
     if width_style == WidthStyle.CALLIGRAPHY:
-        polygons = get_width_polygon(ax, x, y, density_from, density_to, min_width_density, max_width_density,
+        polygons = get_width_polygon(ax, x, y, point_densities, min_width_density, max_width_density,
                                      width_modifier, equidistant=False, round_edges=round_edges)
 
     elif width_style == WidthStyle.EQUIDISTANT:
-        polygons = get_width_polygon(ax, x, y, density_from, density_to, min_width_density, max_width_density,
+        polygons = get_width_polygon(ax, x, y, point_densities, min_width_density, max_width_density,
                                      width_modifier, equidistant=True, round_edges=round_edges)
 
     return line, color_scalar, polygons
