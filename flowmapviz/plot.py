@@ -4,7 +4,6 @@ import logging
 
 import networkx as nx
 import numpy as np
-import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.collections import LineCollection
@@ -70,7 +69,8 @@ def plot_routes(g: nx.MultiDiGraph,
         if type(density) is int:
             density = [density]
 
-        lines_new, color_scalars_new, polygons_new = plot_route(g, node_from, node_to, density, ax, min_width_density, max_width_density,
+        lines_new, color_scalars_new, polygons_new = plot_route(g, node_from, node_to, density, ax,
+                                                                min_width_density, max_width_density,
                                                                 width_modifier=width_modifier,
                                                                 width_style=width_style, round_edges=round_edges)
         if lines_new is None:
@@ -120,35 +120,39 @@ def plot_route(g: nx.MultiDiGraph,
                width_style: WidthStyle,
                round_edges: bool = True,
                **pg_kwargs):
-    edge = g.get_edge_data(node_from, node_to)
-    if edge is None:
+
+    x, y = get_node_coordinates(g, node_from, node_to)
+    if not x or not y:
         return None, None, None
-    else:
-        x, y = get_node_coordinates(edge, g, node_from, node_to)
 
-        # color gradient
-        density_from = densities[0]
-        density_to = densities[-1]
+    # color gradient
+    density_from = densities[0]
+    density_to = densities[-1]
 
-        line = reshape(x, y)
-        color_scalar = np.linspace(density_from, density_to, len(x) - 1)
-        polygons = []
+    line = reshape(x, y)
+    color_scalar = np.linspace(density_from, density_to, len(x) - 1)
+    polygons = []
 
-        # width as filling
-        if width_style == WidthStyle.CALLIGRAPHY:
-            polygons = get_width_polygon(ax, x, y, density_from, density_to, min_width_density, max_width_density,
-                                         width_modifier, equidistant=False, round_edges=round_edges)
+    # width as filling
+    if width_style == WidthStyle.CALLIGRAPHY:
+        polygons = get_width_polygon(ax, x, y, density_from, density_to, min_width_density, max_width_density,
+                                     width_modifier, equidistant=False, round_edges=round_edges)
 
-        elif width_style == WidthStyle.EQUIDISTANT:
-            polygons = get_width_polygon(ax, x, y, density_from, density_to, min_width_density, max_width_density,
-                                         width_modifier, equidistant=True, round_edges=round_edges)
+    elif width_style == WidthStyle.EQUIDISTANT:
+        polygons = get_width_polygon(ax, x, y, density_from, density_to, min_width_density, max_width_density,
+                                     width_modifier, equidistant=True, round_edges=round_edges)
 
-        return line, color_scalar, polygons
+    return line, color_scalar, polygons
 
 
-def get_node_coordinates(edge, g, node_from, node_to):
+def get_node_coordinates(g, node_from, node_to):
     x = []
     y = []
+    edge = g.get_edge_data(node_from, node_to)
+    if edge is None:
+        edge = g.get_edge_data(node_to, node_from)
+        if edge is None:
+            return x, y
 
     data = min(edge.values(), key=lambda d: d["length"])
     if "geometry" in data:
