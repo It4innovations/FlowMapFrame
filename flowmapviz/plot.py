@@ -28,6 +28,16 @@ class WidthStyle(Enum):
     """
 
 
+def map_distance_to_point_units(map_distance: float, ax):
+    lims = np.array([lim[1] - lim[0] for lim in (ax.get_xlim(), ax.get_ylim())])
+    return map_distance * ax.get_window_extent().size / lims
+
+
+def point_units_to_map_distance(value_in_points: float, ax):
+    lims = np.array([lim[1] - lim[0] for lim in (ax.get_xlim(), ax.get_ylim())])
+    return value_in_points * lims / ax.get_window_extent().size
+
+
 def plot_routes(g: nx.MultiDiGraph,
                 ax: Axes,
                 nodes_from: list[int],
@@ -51,7 +61,7 @@ def plot_routes(g: nx.MultiDiGraph,
     :param max_density: density defining color gradient scope
     :param min_width_density: density defining width change scope
     :param max_width_density: density defining width change scope
-    :param width_modifier: width of the line with max_width_density
+    :param width_modifier: width of the line with max_width_density (in points) - min line width is 2
     :param width_style: style of the width representation
     :param round_edges: if True plot circles at the end of wide segments for smoother connection
     :return: LineCollection of color segments, PatchCollection of width representation
@@ -120,7 +130,6 @@ def plot_route(g: nx.MultiDiGraph,
                width_style: WidthStyle,
                round_edges: bool = True,
                **pg_kwargs):
-
     x, y = get_node_coordinates(g, node_from, node_to)
     if not x or not y:
         return None, None, None
@@ -136,6 +145,7 @@ def plot_route(g: nx.MultiDiGraph,
     color_scalar = np.interp(density_index, np.arange(len(densities)), densities)
 
     # width as filling
+    width_modifier, wm2 = point_units_to_map_distance(width_modifier, ax)
     polygons = []
     if width_style == WidthStyle.CALLIGRAPHY:
         polygons = get_width_polygon(ax, x, y, point_densities, min_width_density, max_width_density,

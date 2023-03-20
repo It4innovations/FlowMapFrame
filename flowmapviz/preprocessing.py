@@ -18,7 +18,7 @@ def get_width_polygon(ax: Axes,
                       equidistant: bool = False,
                       round_edges: bool = True,
                       ):
-    widths = np.interp(densities, [min_width_density, max_width_density], [0, width_modifier / 1000])
+    widths = np.interp(densities, [min_width_density, max_width_density], [0, width_modifier])
 
     polygons = []
 

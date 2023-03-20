@@ -6,29 +6,42 @@
 Pro spuštění je potřeba GRAPHML soubor s mapou vykreslované oblasti a soubor s počtem aut v jednotlivých časech na segmentech.
 Viz *segments* níže.
 
-Zavolání funkce pro vykreslení snímku:
+**Zavolání funkce pro vykreslení snímku:**
 
 ```python
 from flowmapviz.plot import plot_routes
 ```
-* segments: třída pd.Dataframe, obsahující sloupce `node_from` a `node_to` (osmnx id definující segment)
-a sloupce `count_from` a `count_to`, definující počet aut u těchto nodů
-
-*  min/max_density: rozmezí určující barvu segmentu - od žluté (min_density) po červenou (max_density)
-* min_width_density: počet aut, při kterém se začně zvyšovat šířka vykreslené cesty
-* max_width_density: počet aut, při kterém nastane maximální šířka cesty
-* width_modifier: maximální šířka cesty
-* width_style = enum
-  * BOXED - zubatý okraj (šířka v pixelech)
-  * CALLIGRAPHY - kaligrafický okraj (šířka v lat stupních / 1000)
+* `node_from` a `node_to` (osmnx id definující segment)
+* `densities`, definující počet aut u těchto nodů
+* `min/max_density`: rozmezí určující barvu segmentu - od žluté (min_density) po červenou (max_density)
+* `min_width_density`: počet aut, při kterém se začně zvyšovat šířka vykreslené cesty
+* `max_width_density`: počet aut, při kterém nastane maximální šířka cesty
+* `width_modifier`: maximální šířka cesty v bodech (pro šířku v lat stupních či v metrech použíjte převod)
+* `width_style` = enum
+  * BOXED - zubatý okraj (šířka v pixelech) - pro plynulost třeba zapnout round_edges
+  * CALLIGRAPHY - kaligrafický okraj
   * EQUIDISTANT - okraj počítaný pomocí equidistanty
-* round_edges: proměnná určující zda se na ohraj segmentů mají vykreslit kruhy pro plynulejší přechod
+* round_edges: proměnná určující, zda se na ohraj segmentů mají vykreslit kruhy pro plynulejší přechod
+* `plot`: pokud nastaveno na False, pak dojde pouze ke generování kolekcí čar a polygonů, ne k jejich vykreslení
+(tvary lze do ax přidat později pomocí mathplotlib.add_collection)
 ```python
-def plot_routes(G, segments, ax,
-                min_density=1, max_density=10,
-                min_width_density=10, max_width_density=50,
-                width_modifier=1,
-                width_style: WidthStyle = WidthStyle.BOXED):
+def plot_routes(g: nx.MultiDiGraph,
+                ax: Axes,
+                nodes_from: list[int],
+                nodes_to: list[int],
+                densities: list[int] | list[list[int]],
+                min_density: int = 1, max_density: int = 10,
+                min_width_density: int = 10, max_width_density: int = 50,
+                width_modifier: float = 1,
+                width_style: WidthStyle = WidthStyle.BOXED,
+                round_edges: bool = True,
+                plot: bool = True)
+```
+**Funkce pro převod jednotek:**  
+Vrací dvojici prvků, kdy první vyjadřuje poměr k ose y a druhá k ose x.
+V implementaci funkce plot_routes jsem zvolila převod dle osy x.
+```python
+from flowmapviz.plot import map_distance_to_point_units
 ```
 
 ## Zadaní práce:
