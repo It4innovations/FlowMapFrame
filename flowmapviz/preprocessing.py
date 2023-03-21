@@ -54,7 +54,7 @@ def create_circle_endings(ax, x, y, width_from, width_to, plot=False):
 # Calligraphy
 
 
-def plot_segment_line_width(ax, x, y,  widths):
+def plot_segment_line_width(ax, x, y, widths):
     """
     Plot coloured line width around line either horizontally or vertically
     """

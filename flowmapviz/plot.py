@@ -10,6 +10,7 @@ from matplotlib.collections import LineCollection
 from enum import Enum, unique
 
 from .preprocessing import get_width_polygon, plot_polygon_patch
+from .zoom import get_zoom_level, get_highway_types, ZoomLevel
 
 
 @unique
@@ -48,8 +49,8 @@ def plot_routes(g: nx.MultiDiGraph,
                 width_modifier: float = 1,
                 width_style: WidthStyle = WidthStyle.BOXED,
                 round_edges: bool = True,
-                plot: bool = True,
-                **pg_kwargs):
+                filter_by_zoom: bool = False,
+                plot: bool = True):
     """
     Plotting of segments into ax with their density represented by color and width
     :param g: Graph representation of base layer map
@@ -64,8 +65,9 @@ def plot_routes(g: nx.MultiDiGraph,
     :param width_modifier: width of the line with max_width_density (in points) - min line width is 2
     :param width_style: style of the width representation
     :param round_edges: if True plot circles at the end of wide segments for smoother connection
-    :return: LineCollection of color segments, PatchCollection of width representation
     :param plot: if True add collections to Ax
+    :param filter_by_zoom: if True filter segments based on the zoom level of ax
+    :return: LineCollection of color segments, PatchCollection of width representation
     """
     lines = []
     color_scalars = []
@@ -74,6 +76,9 @@ def plot_routes(g: nx.MultiDiGraph,
     if not (len(nodes_from) == len(nodes_to) and len(nodes_to) == len(densities)):
         logging.error(f"Nodes_from, nodes_to and densities does not have the same length")
 
+    # get zoom level
+    zoom_level = get_zoom_level(ax) if filter_by_zoom else None
+
     for node_from, node_to, density in zip(nodes_from, nodes_to, densities):
         if type(density) is int:
             density = [density]
@@ -81,7 +86,8 @@ def plot_routes(g: nx.MultiDiGraph,
         lines_new, color_scalars_new, polygons_new = plot_route(g, node_from, node_to, density, ax,
                                                                 min_width_density, max_width_density,
                                                                 width_modifier=width_modifier,
-                                                                width_style=width_style, round_edges=round_edges)
+                                                                width_style=width_style, round_edges=round_edges,
+                                                                zoom_level=zoom_level)
         if lines_new is None:
             false_segments += 1
         else:
@@ -129,8 +135,8 @@ def plot_route(g: nx.MultiDiGraph,
                width_modifier: float,
                width_style: WidthStyle,
                round_edges: bool = True,
-               **pg_kwargs):
-    x, y = get_node_coordinates(g, node_from, node_to)
+               zoom_level: ZoomLevel = None):
+    x, y = get_node_coordinates(g, node_from, node_to, zoom_level)
     if not x or not y:
         return None, None, None
 
@@ -158,16 +164,18 @@ def plot_route(g: nx.MultiDiGraph,
     return line, color_scalar, polygons
 
 
-def get_node_coordinates(g, node_from, node_to):
+def get_node_coordinates(g, node_from, node_to, zoom_level=None):
     x = []
     y = []
     edge = g.get_edge_data(node_from, node_to)
     if edge is None:
-        edge = g.get_edge_data(node_to, node_from)
-        if edge is None:
-            return x, y
+        return None, None
 
     data = min(edge.values(), key=lambda d: d["length"])
+    if 'highway' in data and zoom_level is not None:
+        if data['highway'] not in get_highway_types(zoom_level):
+            return None, None
+
     if "geometry" in data:
         xs, ys = data["geometry"].xy
         x.extend(xs)

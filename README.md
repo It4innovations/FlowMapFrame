@@ -4,7 +4,6 @@
 
 ## Použití
 Pro spuštění je potřeba GRAPHML soubor s mapou vykreslované oblasti a soubor s počtem aut v jednotlivých časech na segmentech.
-Viz *segments* níže.
 
 **Zavolání funkce pro vykreslení snímku:**
 
