@@ -49,7 +49,7 @@ def plot_routes(g: nx.MultiDiGraph,
                 width_modifier: float = 1,
                 width_style: WidthStyle = WidthStyle.BOXED,
                 round_edges: bool = True,
-                filter_by_zoom: bool = False,
+                roadtypes_by_zoom: bool = False,
                 plot: bool = True):
     """
     Plotting of segments into ax with their density represented by color and width
@@ -77,7 +77,7 @@ def plot_routes(g: nx.MultiDiGraph,
         logging.error(f"Nodes_from, nodes_to and densities does not have the same length")
 
     # get zoom level
-    zoom_level = get_zoom_level(ax) if filter_by_zoom else None
+    zoom_level = get_zoom_level(ax) if roadtypes_by_zoom else None
 
     for node_from, node_to, density in zip(nodes_from, nodes_to, densities):
         if type(density) is int:

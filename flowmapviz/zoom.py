@@ -1,5 +1,9 @@
+import networkx as nx
+import osmnx as ox
+
 from enum import Enum, unique
 from matplotlib import pyplot as plt
+from matplotlib.axes import Axes
 
 
 @unique
@@ -41,3 +45,32 @@ def get_highway_types(zoom_level: ZoomLevel):
                 'tertiary', 'tertiary_link'
                 'unclassified', 'residential']
     return []
+
+
+def plot_graph_with_zoom(g: nx.MultiDiGraph,
+                         ax: Axes,
+                         color_primary="dimgray",
+                         color_hidden="darkgray"):
+    lines = ax.collections
+    if not lines:
+        _, ax = ox.plot_graph(g, ax=ax, node_size=0, show=False)
+
+    lines = ax.collections
+    if not lines:
+        return ax
+
+    zoom_level = get_zoom_level(ax)
+
+    if not zoom_level:
+        ax.collections[0].set_color(color_primary)
+        return ax
+
+    ec = []
+    for u, v, k, d in g.edges(keys=True, data=True):
+        if d['highway'] in get_highway_types(zoom_level):
+            ec.append(color_primary)
+        else:
+            ec.append(color_hidden)
+
+    ax.collections[0].set_color(ec)
+    return ax
