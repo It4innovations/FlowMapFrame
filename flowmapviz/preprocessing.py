@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.patches as mp_patches
 from matplotlib.axes import Axes
-from matplotlib.collections import PatchCollection
 from matplotlib.patches import Circle
 from shapely.geometry import LineString
 
@@ -18,6 +17,7 @@ def get_width_polygon(ax: Axes,
                       equidistant: bool = False,
                       round_edges: bool = True,
                       ):
+    width_modifier, wm2 = point_units_to_map_distance(width_modifier, ax)
     widths = np.interp(densities, [min_width_density, max_width_density], [0, width_modifier])
 
     polygons = []
@@ -25,7 +25,7 @@ def get_width_polygon(ax: Axes,
     if widths.any() > 0:
 
         if round_edges:
-            polygons.extend(create_circle_endings(ax, x, y, widths[0], widths[-1]))
+            polygons.extend(create_circle_endings(x, y, widths[0], widths[-1]))
 
         if equidistant:
             patch = get_polygon_from_equidistant(x, y, widths)
@@ -36,9 +36,19 @@ def get_width_polygon(ax: Axes,
     return polygons
 
 
-def create_circle_endings(ax, x, y, width_from, width_to):
+def create_circle_endings(x, y, width_from, width_to):
     patches = [Circle((x[0], y[0]), width_from), Circle((x[-1], y[-1]), width_to)]
     return patches
+
+
+def map_distance_to_point_units(map_distance: float, ax):
+    lims = np.array([lim[1] - lim[0] for lim in (ax.get_xlim(), ax.get_ylim())])
+    return map_distance * ax.get_window_extent().size / lims
+
+
+def point_units_to_map_distance(value_in_points: float, ax):
+    lims = np.array([lim[1] - lim[0] for lim in (ax.get_xlim(), ax.get_ylim())])
+    return value_in_points * lims / ax.get_window_extent().size
 
 
 # ---------------------------------------------------------------------------------

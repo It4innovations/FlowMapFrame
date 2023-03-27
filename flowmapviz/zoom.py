@@ -51,6 +51,9 @@ def plot_graph_with_zoom(g: nx.MultiDiGraph,
                          ax: Axes,
                          color_primary="dimgray",
                          color_hidden="darkgray"):
+    if ax is None:
+        ax = plt.gca()
+
     lines = ax.collections
     if not lines:
         _, ax = ox.plot_graph(g, ax=ax, node_size=0, show=False)
