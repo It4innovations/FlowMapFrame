@@ -36,17 +36,8 @@ def get_width_polygon(ax: Axes,
     return polygons
 
 
-def plot_polygon_patch(ax, patches, color='red'):
-    p = PatchCollection(patches)
-    p.set_facecolor(color)
-    ax.add_collection(p, autolim=False)
-    return p
-
-
-def create_circle_endings(ax, x, y, width_from, width_to, plot=False):
+def create_circle_endings(ax, x, y, width_from, width_to):
     patches = [Circle((x[0], y[0]), width_from), Circle((x[-1], y[-1]), width_to)]
-    if plot:
-        plot_polygon_patch(ax, patches)
     return patches
 
 

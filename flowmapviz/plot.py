@@ -6,10 +6,10 @@ import numpy as np
 
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
-from matplotlib.collections import LineCollection
+from matplotlib.collections import LineCollection, PatchCollection
 from enum import Enum, unique
 
-from .preprocessing import get_width_polygon, plot_polygon_patch
+from .preprocessing import get_width_polygon
 from .zoom import get_zoom_level, get_highway_types, ZoomLevel
 
 
@@ -116,13 +116,18 @@ def plot_routes(g: nx.MultiDiGraph,
             coll.set_capstyle('round')
 
     coll.set_array(color_scalars)
+
     if plot:
         ax.add_collection(coll, autolim=False)
 
-    if polygons and plot:
-        polygons = plot_polygon_patch(ax, polygons)
+    patch = None
+    if polygons:
+        patch = PatchCollection(polygons)
+        patch.set_facecolor('red')
+        if plot:
+            ax.add_collection(patch, autolim=False)
 
-    return coll, polygons
+    return coll, patch
 
 
 def plot_route(g: nx.MultiDiGraph,
