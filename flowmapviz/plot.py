@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+from functools import cache
+
 import networkx as nx
 import numpy as np
 
@@ -8,6 +10,8 @@ from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.collections import LineCollection, PatchCollection
 from enum import Enum, unique
+
+from matplotlib.colors import ListedColormap
 
 from .preprocessing import get_width_polygon
 from .zoom import get_zoom_level, get_highway_types, ZoomLevel
@@ -36,10 +40,10 @@ def plot_routes(g: nx.MultiDiGraph,
                 densities: list[int] | list[list[int]],
                 min_density: int = 1, max_density: int = 10,
                 min_width_density: int = 10, max_width_density: int = 50,
-                width_modifier: float = 1,
+                default_linewidth: float = 3, width_modifier: float = 1,
                 width_style: WidthStyle = WidthStyle.BOXED,
                 round_edges: bool = True,
-                roadtypes_by_zoom: bool = False,
+                roadtypes_by_zoom: bool = False, hidden_lines_width = 1,
                 plot: bool = True):
     """
     Plotting of segments into ax with their density represented by color and width
@@ -52,7 +56,8 @@ def plot_routes(g: nx.MultiDiGraph,
     :param max_density: density defining color gradient scope
     :param min_width_density: density defining width change scope
     :param max_width_density: density defining width change scope
-    :param width_modifier: width of the line with max_width_density (in points) - min line width is 2
+    :param default_linewidth: width of the line with min_width_density (in points)
+    :param width_modifier: width of the line with max_width_density (in points)
     :param width_style: style of the width representation
     :param round_edges: if True plot circles at the end of wide segments for smoother connection
     :param plot: if True add collections to Ax
@@ -62,7 +67,10 @@ def plot_routes(g: nx.MultiDiGraph,
     lines = []
     color_scalars = []
     polygons = []
+    zoomed_lines = []
+    zoomed_color_scalars = []
     false_segments = 0
+
     if not (len(nodes_from) == len(nodes_to) and len(nodes_to) == len(densities)):
         logging.error(f"Nodes_from, nodes_to and densities does not have the same length")
 
@@ -78,12 +86,24 @@ def plot_routes(g: nx.MultiDiGraph,
                                                                 width_modifier=width_modifier,
                                                                 width_style=width_style, round_edges=round_edges,
                                                                 zoom_level=zoom_level)
-        if lines_new is None:
-            false_segments += 1
-        else:
+        # get geometry data for smaller zoom
+        z_lines_new, z_colors_new = None, None
+        if zoom_level and hidden_lines_width != 0 and lines_new is None:
+            z_lines_new, z_colors_new, _ = plot_route(g, node_from, node_to, density, ax,
+                                                      min_width_density, max_width_density,
+                                                      width_modifier=width_modifier,
+                                                      width_style=None,
+                                                      zoom_level=None)
+
+        if lines_new is not None:
             lines.append(lines_new)
             color_scalars.append(color_scalars_new)
             polygons.extend(polygons_new)
+        elif z_lines_new is not None:
+            zoomed_lines.append(z_lines_new)
+            zoomed_color_scalars.append(z_colors_new)
+        else:
+            false_segments += 1
 
     if false_segments:
         logging.info(f"False segments: {false_segments} from {len(nodes_from)}")
@@ -91,21 +111,33 @@ def plot_routes(g: nx.MultiDiGraph,
     if not lines:
         return None, None
 
-    # plotting of gradient lines
-    lines = np.vstack(lines)
     color_scalars = np.hstack(color_scalars)
-    norm = plt.Normalize(min_density, max_density)
-
-    coll = LineCollection(lines, cmap='autumn_r', norm=norm)
 
     # width in collection
     if width_style == WidthStyle.BOXED:
-        line_widths = np.interp(color_scalars, [min_width_density, max_width_density], [2, 2 + width_modifier])
-        coll.set_linewidth(line_widths)
-        if round_edges:
-            coll.set_capstyle('round')
+        line_widths = np.interp(color_scalars, [min_width_density, max_width_density],
+                                [default_linewidth, default_linewidth + width_modifier])
+    else:
+        line_widths = np.full(len(color_scalars), default_linewidth)
 
+    # add width for zoomed segments
+    if zoomed_color_scalars:
+        zoomed_color_scalars = np.hstack(zoomed_color_scalars)
+        arr = np.full(len(zoomed_color_scalars), hidden_lines_width)
+        line_widths = np.concatenate((line_widths, arr))
+        color_scalars = np.concatenate((color_scalars, zoomed_color_scalars))
+
+    # create collection
+    lines.extend(zoomed_lines)
+    lines = np.vstack(lines)
+    norm = plt.Normalize(min_density, max_density)
+    coll = LineCollection(lines, cmap=get_cmap(), norm=norm)
+
+    coll.set_linewidth(line_widths)
     coll.set_array(color_scalars)
+
+    if round_edges:
+        coll.set_capstyle('round')
 
     if plot:
         ax.add_collection(coll, autolim=False)
@@ -113,7 +145,7 @@ def plot_routes(g: nx.MultiDiGraph,
     patch = None
     if polygons:
         patch = PatchCollection(polygons)
-        patch.set_facecolor('red')
+        patch.set_facecolor(get_cmap()(1.0))
         if plot:
             ax.add_collection(patch, autolim=False)
 
@@ -128,7 +160,7 @@ def plot_route(g: nx.MultiDiGraph,
                min_width_density: int,
                max_width_density: int,
                width_modifier: float,
-               width_style: WidthStyle,
+               width_style: WidthStyle | None,
                round_edges: bool = True,
                zoom_level: ZoomLevel = None):
     x, y = get_node_coordinates(g, node_from, node_to, zoom_level)
@@ -188,3 +220,10 @@ def reshape(x, y):
     points = np.vstack([x, y]).T.reshape(-1, 1, 2)
     points = np.concatenate([points[:-1], points[1:]], axis=1)
     return points
+
+
+@cache
+def get_cmap():
+    cmap = plt.get_cmap('autumn_r', 512)
+    newcmp = ListedColormap(cmap(np.linspace(0.25, 1, 256)))
+    return newcmp

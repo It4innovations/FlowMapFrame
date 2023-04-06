@@ -144,8 +144,12 @@ def calculate_equidistant_coords(x, y, distances):
     for i in range(1, len(x_eq)):
         seg = LineString(zip(x_eq[i - 1:i + 1], y_eq[i - 1:i + 1]))
 
-        if original_line.intersection(seg):
-            x_eq[i], x_eq2[i] = x_eq2[i], x_eq[i]
-            y_eq[i], y_eq2[i] = y_eq2[i], y_eq[i]
+        # try catch block
+        try:
+            if original_line.intersection(seg):
+                x_eq[i], x_eq2[i] = x_eq2[i], x_eq[i]
+                y_eq[i], y_eq2[i] = y_eq2[i], y_eq[i]
+        except RuntimeWarning:
+            print("warning lol")
 
     return x_eq, y_eq, x_eq2, y_eq2
