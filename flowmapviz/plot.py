@@ -19,6 +19,10 @@ from .zoom import get_zoom_level, get_highway_types, ZoomLevel
 
 @unique
 class WidthStyle(Enum):
+    NONE = 0
+    """
+    uses only color
+    """
     BOXED = 1
     """
     uses matplotlib.LineCollection
