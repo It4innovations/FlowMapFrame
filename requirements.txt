@@ -1,6 +1,7 @@
 pandas
-numpy
-matplotlib
-shapely
-setuptools
-networkx
+numpy~=1.24.1
+matplotlib~=3.7.0.dev1536+g6820797819
+shapely~=2.0.1
+setuptools~=67.1.0
+networkx~=3.0
+osmnx~=1.3.0
