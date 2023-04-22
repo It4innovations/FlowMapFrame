@@ -1,12 +1,12 @@
 # flowmapviz
 
-Flowmapviz is a simple package for traffic flow visualization, that was created as a part of a bachelor thesis.
+flowmapviz is a simple package for traffic flow visualization that was created as part of a bachelor's thesis.
 It includes functionality for rendering a single frame of a traffic flow map, that can be used for video rendering.
-This functionality is based on matplotlib and osmnx packages.
+This functionality is based on the matplotlib and osmnx packages.
 
-The traffic map is represented as a network graph, where the color and the width of edges is determined by the number of vehicles on the road segment.
+The traffic map is rendered as a network graph where the color and width of edges are determined by the number of vehicles on the road segment.
 
-Flowmapviz is mainly used in [FlowMapVideo](https://github.com/It4innovations/FlowMapFrame)
+flowmapviz is mainly used in [FlowMapVideo](https://github.com/It4innovations/FlowMapFrame)
 for rendering videos of traffic flow based on the data from the [Ruth](https://github.com/It4innovations/ruth) simulator.
 
 ## Installation
@@ -16,17 +16,17 @@ python pip install https://github.com/It4innovations/FlowMapFrame
 ```
 
 ## Examples
-As example use, you can run a slider interactive visualization to try all configurable parameters.
-To run the example, download data from [Zenodo](https://doi.org/10.5281/zenodo.7843650) and run the following command in the terminal:
+As an example, you can run an interactive slider visualization to try the configurable parameters.
+To run the example, download input data from [Zenodo](https://doi.org/10.5281/zenodo.7843650) and run the following command in the terminal:
 ```bash
 flowmapviz-example map.graphml sim_data.pickle
 ```
-
-![alt text](https://github.com/It4innovations/FlowMapFrame/docs/example.gif "Example gif")
+<p align="center">
+<img src="https://github.com/It4innovations/FlowMapFrame/blob/main/docs/example.gif" height="400"/>
+</p>
 
 ## Step-by-step guide
 The following code shows how to use the package to render a single frame of a traffic flow map.
-
 
 Importing the package:
 ```python
