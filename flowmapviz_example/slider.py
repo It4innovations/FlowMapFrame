@@ -53,9 +53,11 @@ def display_help():
 @click.command()
 @click.argument('map-file', type=click.Path(exists=True))
 @click.argument('segments-file', type=click.Path(exists=True))
-@click.option('--width-in-map-distance', is_flag=True, default=False, help='if set, width is in map distance, otherwise'
-                                                                           'in points')
-def main(map_file, segments_file, width_in_map_distance, width_style="EQUIDISTANT", width_modif=10):
+@click.option('--width-in-map-distance', is_flag=True, default=False,
+              help='if set, width is in map distance, otherwise in points')
+@click.option('--moving-slider', is_flag=True, default=False,
+              help='if set, time slider will move during video generating')
+def main(map_file, segments_file, width_in_map_distance, moving_slider=False, width_style="EQUIDISTANT", width_modif=10):
     print('Loading data.')
     # read data saved from FlowMapVideo repository
     times_dic = pd.read_pickle(segments_file)
@@ -64,11 +66,12 @@ def main(map_file, segments_file, width_in_map_distance, width_style="EQUIDISTAN
     g = ox.load_graphml(map_file)
 
     # create slider window
-    _ = SliderWindow(g, times_dic, width_style, width_modif, width_in_map_distance)
+    SliderWindow(g, times_dic, width_style, width_modif, width_in_map_distance, moving_slider).execute()
+    print('Closing...')
 
 
 class SliderWindow:
-    def __init__(self, g, times_dic, width_style, width_modif, width_in_map_distance):
+    def __init__(self, g, times_dic, width_style, width_modif, width_in_map_distance, moving_slider):
         self.times_dic = times_dic
         self.keys = list(sorted(self.times_dic.keys()))
 
@@ -79,17 +82,26 @@ class SliderWindow:
         self.width_style = WidthStyle[width_style]
         self.round_edges = False
         self.roadtypes_by_zoom = False
-        self.video_mode = False
         self.width_in_map_distance = width_in_map_distance
+        self.width_modif = width_modif
+        self.moving_slider = moving_slider
 
+        self.width_slider = None
+        self.time_slider = None
+        self.last_zoom_level = None
+        self.ax_map = None
+        self.ax_density = None
+        self.time_pid = None
+
+    def execute(self):
         f, self.ax_density, self.ax_map = twin_axes(self.g)
         self.last_zoom_level = get_zoom_level(self.ax_density)
 
         # add sliders
-        self.time_slider, self.width_slider = create_sliders(len(self.keys), 100, width_modif)
+        self.time_slider, self.width_slider = create_sliders(len(self.keys), 100, self.width_modif)
 
         f.canvas.mpl_connect('key_press_event', self.on_press)
-        self.time_slider.on_changed(self.update)
+        self.time_pid = self.time_slider.on_changed(self.update)
         self.width_slider.on_changed(self.width_update)
         self.ax_map.callbacks.connect('xlim_changed', self.on_lim_changed)
         self.ax_map.callbacks.connect('ylim_changed', self.on_lim_changed)
@@ -128,15 +140,12 @@ class SliderWindow:
             self.time_slider.set_val(len(self.keys) // 2)
         elif event.key == 'v':
             print('Video export')
-            self.video_mode = True
 
-            anim = animation.FuncAnimation(plt.gcf(), self.animate(), interval=1000, frames=20, repeat=False)
+            anim = animation.FuncAnimation(plt.gcf(), self.animate(), interval=500, frames=3, repeat=False)
 
             timestamp = round(time() * 1000)
-            anim.save(os.path.join(str(timestamp) + "-rt.gif"), writer="ffmpeg")
-
+            anim.save(os.path.join(str(timestamp) + "-rt.gif"), writer="pillow")
             print('DONE')
-            self.video_mode = False
 
     def update(self, val=None):
         if val is None:
@@ -174,8 +183,9 @@ class SliderWindow:
                                          round_edges=self.round_edges,
                                          roadtypes_by_zoom=self.roadtypes_by_zoom)
 
-        if not self.video_mode:
-            plt.gcf().canvas.draw_idle()
+        f = plt.gcf()
+        f.canvas.draw_idle()
+        f.canvas.flush_events()
 
         finish = datetime.now()
         print(val, finish - start)
@@ -186,8 +196,10 @@ class SliderWindow:
 
     def animate(self):
         def step(i):
-            self.update(self.time_slider.val + i)
-            # self.time_slider.set_val(self.time_slider.val + 1)
+            if self.moving_slider:
+                self.time_slider.set_val(self.time_slider.val + 1)
+            else:
+                self.update(self.time_slider.val + i)
 
         return step
 

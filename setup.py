@@ -11,6 +11,7 @@ setup(
     author_email='smo0117@vsb.cz',
     description='Package for plotting routes',
     install_requires=requirements,
+    include_package_data=True,
     entry_points={
         "console_scripts": [
             "flowmapviz-example = flowmapviz_example.slider:main"

@@ -1,8 +1,8 @@
 # Flowmapviz example with slider
 
-Download the data folder from this repository. Then run the following command in the terminal:
+Download the input data from [Zenodo](https://doi.org/10.5281/zenodo.7843650). Then run the following command in the terminal:
 ```bash
-flowmapviz-example ./data/map.graphml ./data/sim_data.pickle
+flowmapviz-example map.graphml sim_data.pickle
 ```
 ### Navigation Keyboard Shortcuts:
 
