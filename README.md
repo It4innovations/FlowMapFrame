@@ -6,7 +6,7 @@ This functionality is based on the matplotlib and osmnx packages.
 
 The traffic map is rendered as a network graph where the color and width of edges are determined by the number of vehicles on the road segment.
 
-flowmapviz is mainly used in [FlowMapVideo](https://github.com/It4innovations/FlowMapFrame)
+flowmapviz is mainly used in [FlowMapVideo](https://github.com/It4innovations/FlowMapVideo)
 for rendering videos of traffic flow based on the data from the [Ruth](https://github.com/It4innovations/ruth) simulator.
 
 ## Installation
@@ -37,7 +37,7 @@ Loading graph representing the map:
 import osmnx as ox
 g = ox.load_graphml("map.graphml")
 ```
-Loading the preprocessed data saved from [FlowMapVideo](https://github.com/It4innovations/FlowMapFrame):
+Loading the preprocessed data saved from [FlowMapVideo](https://github.com/It4innovations/FlowMapVideo):
 ```python
 import pandas as pd
 times_dic = pd.read_pickle("sim_data.pickle")
@@ -49,16 +49,16 @@ from flowmapviz.zoom import plot_graph_with_zoom
 import matplotlib.pyplot as plt
             
 fig, ax = plt.subplots()
-ax_map = plot_graph_with_zoom(g, ax)
+ax = plot_graph_with_zoom(g, ax)
 ```
 **Rendering the traffic flow:**
 
 - Min and max density define the range of values for the color scale.
 - Min and max width density define the range of values for the width scale.
 - Default linewidth is the width of the line when the density is min density.
-- Width modifier is the width of the line when the density is max density.
+- Width modifier is the width of the line when the density is max width density.
 - Road types by zoom is a boolean value that determines whether the road types are filtered by zoom level.
-- hidden lines width is the width of the lines that are not "visible" at the current zoom level.
+- Hidden lines width is the width of the lines that are not "visible" at the current zoom level.
 ```python
 from flowmapviz.plot import plot_routes, WidthStyle
 import matplotlib.pyplot as plt
