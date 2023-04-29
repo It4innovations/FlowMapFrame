@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2023 IT4Innovations
+Copyright (c) 2023 Pavlina Smolkova
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
