@@ -1,5 +1,9 @@
 # flowmapviz
 
+| :exclamation:  Notice  |
+|:---------------------------|
+| This repository is no longer being managed or updated. For the latest version of the code, please visit [new repository](https://code.it4i.cz/mic0427/traffic-flow-map) |
+
 flowmapviz is a simple package for traffic flow visualization that was created as part of a bachelor's thesis.
 It includes functionality for rendering a single frame of a traffic flow map, that can be used for video rendering.
 This functionality is based on the matplotlib and osmnx packages.
